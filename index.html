@@ -659,7 +659,9 @@ footer span {
             <p>Fill in your details and choose your events.</p>
         </div>
 
-        <form id="registrationForm">
+        <form id="registrationForm"
+      action="https://formspree.io/f/maeeezkl"
+      method="POST">
 
             <div class="form-group">
                 <label for="fullName">Full Name</label>
@@ -928,7 +930,7 @@ eventCheckboxes.forEach(function (checkbox) {
 
 eventCount.addEventListener("input", updateEventCount);
 
-registrationForm.addEventListener("submit", function (event) {
+registrationForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const selectedEvents = eventCheckboxes.filter(function (checkbox) {
@@ -946,9 +948,39 @@ registrationForm.addEventListener("submit", function (event) {
         return;
     }
 
-    formMessage.textContent =
-        "The form is valid! Online registration is not active yet. " +
-        "Connect a form service to submit your details.";
+    formMessage.textContent = "Submitting your registration...";
+
+    const submitButton = registrationForm.querySelector(
+        'button[type="submit"]'
+    );
+
+    submitButton.disabled = true;
+
+    try {
+        const response = await fetch(registrationForm.action, {
+            method: "POST",
+            body: new FormData(registrationForm),
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        if (response.ok) {
+            formMessage.textContent =
+                "Registration submitted successfully! Thank you for registering.";
+
+            registrationForm.reset();
+            updateEventCount();
+        } else {
+            formMessage.textContent =
+                "Submission failed. Please check your Formspree setup and try again.";
+        }
+    } catch (error) {
+        formMessage.textContent =
+            "Unable to submit right now. Please check your internet connection and try again.";
+    } finally {
+        submitButton.disabled = false;
+    }
 });
 </script>
 
